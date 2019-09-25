@@ -9,7 +9,7 @@ class UdpEchoService() extends Actor {
   import context.system
   IO(Udp) ! Udp.Bind(self, new InetSocketAddress("localhost", 2313))
 
-  def receive = {
+  def receive: PartialFunction[Any, Unit] = {
     case Udp.Bound(_) =>
       context.become(ready(sender))
   }
