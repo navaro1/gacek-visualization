@@ -1,9 +1,11 @@
 package com.petlew.gacek.visualisation
 
+import java.net.InetSocketAddress
+
 import akka.actor.{Actor, ActorSystem, Props}
 
 class HelloActor extends Actor {
-  def receive = {
+  def receive: PartialFunction[Any, Unit] = {
     case "hello" => println("hello back at you")
     case _       => println("huh?")
   }
@@ -11,8 +13,8 @@ class HelloActor extends Actor {
 
 object Main extends App {
   val system = ActorSystem("HelloSystem")
-  val server = system.actorOf(Props[UdpEchoService].withMailbox("mailbox"))
-  val listener = system.actorOf(Props[QueueEventListener].withMailbox("mailbox"))
+  private val address = new InetSocketAddress("localhost", 2313)
+  val server = system.actorOf(UdpEchoService.props(address).withMailbox("mailbox"))
   Thread.sleep(5000)
   println("TEST")
 

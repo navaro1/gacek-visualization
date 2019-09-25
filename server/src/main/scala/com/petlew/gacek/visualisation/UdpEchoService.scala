@@ -2,8 +2,13 @@ package com.petlew.gacek.visualisation
 
 import java.net.InetSocketAddress
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{Actor, ActorRef, Props}
 import akka.io.{IO, Udp}
+
+object UdpEchoService {
+
+  def props(address: InetSocketAddress): Props = Props(new UdpEchoService(address))
+}
 
 class UdpEchoService(address: InetSocketAddress) extends Actor {
   import context.system
@@ -15,8 +20,9 @@ class UdpEchoService(address: InetSocketAddress) extends Actor {
   }
 
   def ready(socket: ActorRef): Receive = {
-    case Udp.Received(data, remote) =>
-      QueueEventDeserializer.read(data)
+    case Udp.Received(data, _) =>
+      val event = QueueEventDeserializer.read(data)
+      println(event)
     case Udp.Unbind => socket ! Udp.Unbind
     case Udp.Unbound => context.stop(self)
   }
