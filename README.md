@@ -11,3 +11,7 @@ Current version: 0.0.1
 - [ ] Fully tested project 
 - [ ] Move to Akka Typed
 - [ ] Sample project
+
+### Backlog
+- Reactive stream publishing/consuming
+- Play by play replay of actors
