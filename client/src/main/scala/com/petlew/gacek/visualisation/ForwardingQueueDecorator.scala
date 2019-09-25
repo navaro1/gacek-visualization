@@ -29,7 +29,7 @@ class ForwardingQueueDecorator(queue: MessageQueue,
 
   override def enqueue(receiver: ActorRef, handle: Envelope): Unit = {
     val message = EnqueueEvent(
-      timestamp(),
+      timestamp,
       numberOfMessages,
       receiver.path.toSerializationFormat,
       handle.sender.path.toSerializationFormat,

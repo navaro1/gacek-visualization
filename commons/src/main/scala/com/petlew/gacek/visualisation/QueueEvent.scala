@@ -24,7 +24,7 @@ object QueueEventDeserializer {
       strings(1) toInt,
       strings(2),
       strings(3),
-      strings(4)
+      strings(4).trim
     )
   }
 }
