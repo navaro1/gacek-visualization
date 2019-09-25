@@ -8,10 +8,9 @@ Current version: 0.0.1
 
 - [ ] Seperate projects for client and server
 - [ ] Most naive visualization in d3.js - only count of messages from and to actors
-- [ ] Fully tested project 
-- [ ] Move to Akka Typed
 - [ ] Sample project
 
 ### Backlog
 - Reactive stream publishing/consuming
 - Play by play replay of actors
+- Move to Akka Typed
