@@ -5,9 +5,9 @@ import java.net.InetSocketAddress
 import akka.actor.{Actor, ActorRef}
 import akka.io.{IO, Udp}
 
-class UdpEchoService() extends Actor {
+class UdpEchoService(address: InetSocketAddress) extends Actor {
   import context.system
-  IO(Udp) ! Udp.Bind(self, new InetSocketAddress("localhost", 2313))
+  IO(Udp) ! Udp.Bind(self, address)
 
   def receive: PartialFunction[Any, Unit] = {
     case Udp.Bound(_) =>
@@ -16,7 +16,7 @@ class UdpEchoService() extends Actor {
 
   def ready(socket: ActorRef): Receive = {
     case Udp.Received(data, remote) =>
-      println("SERVER RECEIVED:")
+      QueueEventDeserializer.read(data)
     case Udp.Unbind => socket ! Udp.Unbind
     case Udp.Unbound => context.stop(self)
   }

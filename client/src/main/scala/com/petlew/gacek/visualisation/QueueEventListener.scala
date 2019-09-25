@@ -10,7 +10,8 @@ class QueueEventListener(address: InetSocketAddress) extends Actor {
 
   import context.system
 
-  this.context.system.eventStream.subscribe(this.context.self, classOf[QueueEvent])
+  this.context.system.eventStream
+    .subscribe(this.context.self, classOf[QueueEvent])
 
   IO(Udp) ! Udp.SimpleSender
 
@@ -21,7 +22,7 @@ class QueueEventListener(address: InetSocketAddress) extends Actor {
 
   def ready(send: ActorRef): Receive = {
     case msg: QueueEvent =>
-      send ! Udp.Send(ByteString(msg.toString), address)
+      send ! Udp.Send(QueueEventSerializer(msg), address)
   }
 
 }
