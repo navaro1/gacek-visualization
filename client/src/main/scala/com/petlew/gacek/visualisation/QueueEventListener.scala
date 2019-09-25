@@ -14,7 +14,7 @@ class QueueEventListener(address: InetSocketAddress) extends Actor {
 
   IO(Udp) ! Udp.SimpleSender
 
-  def receive = {
+  def receive: PartialFunction[Any, Unit] = {
     case Udp.SimpleSenderReady =>
       context.become(ready(sender()))
   }
