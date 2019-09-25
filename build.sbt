@@ -26,6 +26,7 @@ lazy val root = (project in file("."))
     name := "Gacek Visualisation",
     commonDependencies
   )
+  .dependsOn(commons, server, client)
 
 // Uncomment the following for publishing to Sonatype.
 // See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for more detail.
