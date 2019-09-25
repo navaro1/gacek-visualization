@@ -1,15 +1,30 @@
 import Dependencies._
 
 ThisBuild / scalaVersion     := "2.12.8"
-ThisBuild / version          := "0.1.0-SNAPSHOT"
-ThisBuild / organization     := "com.example"
-ThisBuild / organizationName := "example"
+ThisBuild / version          := "0.0.1-SNAPSHOT"
+ThisBuild / organization     := "com.petlew.gacek"
+ThisBuild / organizationName := "visualization"
+
+lazy val commonDependencies = Seq(
+  libraryDependencies += scalaTest % Test,
+  libraryDependencies += akkaActor % Compile
+)
+
+lazy val commons = (project in file("commons"))
+  .settings(commonDependencies)
+
+lazy val server = (project in file("server"))
+  .dependsOn(commons)
+  .settings(commonDependencies)
+
+lazy val client = (project in file("client"))
+  .dependsOn(commons)
+  .settings(commonDependencies)
 
 lazy val root = (project in file("."))
   .settings(
     name := "Gacek Visualisation",
-    libraryDependencies += scalaTest % Test,
-    libraryDependencies += akkaActor % Compile
+    commonDependencies
   )
 
 // Uncomment the following for publishing to Sonatype.

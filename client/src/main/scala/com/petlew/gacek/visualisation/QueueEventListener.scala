@@ -6,8 +6,10 @@ import akka.actor.{Actor, ActorRef}
 import akka.io.{IO, Udp}
 import akka.util.ByteString
 
-class QueueEventListener extends Actor {
+class QueueEventListener(address: InetSocketAddress) extends Actor {
+
   import context.system
+
   this.context.system.eventStream.subscribe(this.context.self, classOf[QueueEvent])
 
   IO(Udp) ! Udp.SimpleSender
@@ -19,6 +21,7 @@ class QueueEventListener extends Actor {
 
   def ready(send: ActorRef): Receive = {
     case msg: QueueEvent =>
-      send ! Udp.Send(ByteString(msg.toString), new InetSocketAddress("localhost", 2313))
+      send ! Udp.Send(ByteString(msg.toString), address)
   }
+
 }
