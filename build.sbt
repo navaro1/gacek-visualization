@@ -9,13 +9,18 @@ lazy val commonDependencies = Seq(
   libraryDependencies += scalaTest % Test,
   libraryDependencies += akkaActor % Compile
 )
-
+//akkaHttp
 lazy val commons = (project in file("commons"))
   .settings(commonDependencies)
 
 lazy val server = (project in file("server"))
   .dependsOn(commons)
-  .settings(commonDependencies)
+  .settings(
+    commonDependencies,
+    libraryDependencies += akkaHttp % Compile,
+    libraryDependencies += akkaStream % Compile,
+    libraryDependencies += circeCore % Compile
+  )
 
 lazy val client = (project in file("client"))
   .dependsOn(commons)
