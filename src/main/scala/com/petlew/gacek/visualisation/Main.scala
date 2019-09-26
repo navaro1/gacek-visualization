@@ -13,8 +13,8 @@ class HelloActor extends Actor {
 
 object Main extends App {
   val system = ActorSystem("HelloSystem")
-  private val address = new InetSocketAddress("localhost", 2313)
-  val server = system.actorOf(UdpEchoService.props(address).withMailbox("mailbox"))
+//  private val address = new InetSocketAddress("localhost", 2313)
+//  val server = system.actorOf(UdpEchoService.props(address).withMailbox("mailbox"))
   Thread.sleep(5000)
   println("TEST")
 

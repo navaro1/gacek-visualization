@@ -19,7 +19,7 @@ lazy val server = (project in file("server"))
     commonDependencies,
     libraryDependencies += akkaHttp % Compile,
     libraryDependencies += akkaStream % Compile,
-    libraryDependencies += circeCore % Compile
+    libraryDependencies += sprayJson % Compile
   )
 
 lazy val client = (project in file("client"))

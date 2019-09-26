@@ -20,7 +20,8 @@ class Store extends Actor {
     case StoreEvent(event: QueueEvent) =>
       events += event
     case GetEvents =>
-      sender ! Events(events)
+      val evnts = Events(events)
+      sender() ! evnts
 
   }
 }
