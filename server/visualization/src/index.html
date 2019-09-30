@@ -5,9 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style type="text/css">
-        .node {}
+        .node {
+        }
 
-        .link { stroke: #999; stroke-opacity: .6; stroke-width: 1px; }
+        .link {
+            stroke: #999;
+            stroke-opacity: .6;
+            stroke-width: 1px;
+        }
     </style>
 </head>
 <body>
@@ -15,9 +20,12 @@
 
 <script src="https://d3js.org/d3.v4.min.js" type="text/javascript"></script>
 <script src="https://d3js.org/d3-selection-multi.v1.js"></script>
+<script
+    src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+    crossorigin="anonymous"></script>
 
 <script type="text/javascript">
-    console.log("HELLO");
     // http://bl.ocks.org/fancellu/2c782394602a93921faff74e594d1bb1
     var colors = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -76,27 +84,37 @@
         link;
 
     svg.append('defs').append('marker')
-        .attrs({'id':'arrowhead',
-            'viewBox':'-0 -5 10 10',
-            'refX':13,
-            'refY':0,
-            'orient':'auto',
-            'markerWidth':13,
-            'markerHeight':13,
-            'xoverflow':'visible'})
+        .attrs({
+            'id': 'arrowhead',
+            'viewBox': '-0 -5 10 10',
+            'refX': 13,
+            'refY': 0,
+            'orient': 'auto',
+            'markerWidth': 13,
+            'markerHeight': 13,
+            'xoverflow': 'visible'
+        })
         .append('svg:path')
         .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
         .attr('fill', '#999')
-        .style('stroke','none');
+        .style('stroke', 'none');
 
     var simulation = d3.forceSimulation()
-        .force("link", d3.forceLink().id(function (d) {return d.id;}).distance(100).strength(1))
+        .force("link", d3.forceLink().id(function (d) {
+            return d.id;
+        }).distance(100).strength(1))
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2));
 
 
     update(graphData.links, graphData.nodes);
 
+    $.ajax({
+        url: "http://localhost:8080/",
+        success: function (result) {
+            console.log(result)
+        }
+    });
 
 
     // d3.json({}, function (error, graph) {
@@ -111,10 +129,12 @@
             .enter()
             .append("line")
             .attr("class", "link")
-            .attr('marker-end','url(#arrowhead)')
+            .attr('marker-end', 'url(#arrowhead)');
 
         link.append("title")
-            .text(function (d) {return d.type;});
+            .text(function (d) {
+                return d.type;
+            });
 
         edgepaths = svg.selectAll(".edgepath")
             .data(links)
@@ -124,7 +144,9 @@
                 'class': 'edgepath',
                 'fill-opacity': 0,
                 'stroke-opacity': 0,
-                'id': function (d, i) {return 'edgepath' + i}
+                'id': function (d, i) {
+                    return 'edgepath' + i
+                }
             })
             .style("pointer-events", "none");
 
@@ -135,17 +157,23 @@
             .style("pointer-events", "none")
             .attrs({
                 'class': 'edgelabel',
-                'id': function (d, i) {return 'edgelabel' + i},
+                'id': function (d, i) {
+                    return 'edgelabel' + i
+                },
                 'font-size': 10,
                 'fill': '#aaa'
             });
 
         edgelabels.append('textPath')
-            .attr('xlink:href', function (d, i) {return '#edgepath' + i})
+            .attr('xlink:href', function (d, i) {
+                return '#edgepath' + i
+            })
             .style("text-anchor", "middle")
             .style("pointer-events", "none")
             .attr("startOffset", "50%")
-            .text(function (d) {return d.type});
+            .text(function (d) {
+                return d.type
+            });
 
         node = svg.selectAll(".node")
             .data(nodes)
@@ -160,14 +188,20 @@
 
         node.append("circle")
             .attr("r", 5)
-            .style("fill", function (d, i) {return colors(i);})
+            .style("fill", function (d, i) {
+                return colors(i);
+            });
 
         node.append("title")
-            .text(function (d) {return d.id;});
+            .text(function (d) {
+                return d.id;
+            });
 
         node.append("text")
             .attr("dy", -3)
-            .text(function (d) {return d.name+":"+d.label;});
+            .text(function (d) {
+                return d.name + ":" + d.label;
+            });
 
         simulation
             .nodes(nodes)
@@ -179,13 +213,23 @@
 
     function ticked() {
         link
-            .attr("x1", function (d) {return d.source.x;})
-            .attr("y1", function (d) {return d.source.y;})
-            .attr("x2", function (d) {return d.target.x;})
-            .attr("y2", function (d) {return d.target.y;});
+            .attr("x1", function (d) {
+                return d.source.x;
+            })
+            .attr("y1", function (d) {
+                return d.source.y;
+            })
+            .attr("x2", function (d) {
+                return d.target.x;
+            })
+            .attr("y2", function (d) {
+                return d.target.y;
+            });
 
         node
-            .attr("transform", function (d) {return "translate(" + d.x + ", " + d.y + ")";});
+            .attr("transform", function (d) {
+                return "translate(" + d.x + ", " + d.y + ")";
+            });
 
         edgepaths.attr('d', function (d) {
             return 'M ' + d.source.x + ' ' + d.source.y + ' L ' + d.target.x + ' ' + d.target.y;
@@ -198,8 +242,7 @@
                 rx = bbox.x + bbox.width / 2;
                 ry = bbox.y + bbox.height / 2;
                 return 'rotate(180 ' + rx + ' ' + ry + ')';
-            }
-            else {
+            } else {
                 return 'rotate(0)';
             }
         });

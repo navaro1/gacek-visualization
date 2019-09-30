@@ -3,7 +3,7 @@ import java.net.InetSocketAddress
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
+import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.Directives
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
@@ -32,11 +32,22 @@ object Main extends Directives with App with JsonSupport {
     UdpEchoService.props(new InetSocketAddress("localhost", 2321), store)
   )
 
+  private val corsResponseHeaders = List(
+    `Access-Control-Allow-Origin`.*,
+    `Access-Control-Allow-Credentials`(true),
+    `Access-Control-Allow-Headers`("Authorization",
+      "Content-Type", "X-Requested-With"),
+    `Access-Control-Max-Age`(1.day.toMillis) //Tell browser to cache OPTIONS requests
+  )
+
   val routes =
     get {
       concat(
         pathSingleSlash {
-          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<html><body>Hello world!</body></html>"))
+          val eventualEvents = (store ? GetEvents).mapTo[Events].map(_.events).map(_.map(_.asInstanceOf[EnqueueEvent]))
+          respondWithHeaders(corsResponseHeaders) {
+            complete(eventualEvents)
+          }
         },
         path("ping") {
           complete("PONG!")
@@ -46,44 +57,6 @@ object Main extends Directives with App with JsonSupport {
         }
       )
     }
-//    concat(
-//      pathPrefix("") {
-//        get {
-//          pathEnd {
-//            val eventualEvents = (store ? GetEvents).mapTo[Events].map(_.events).map(_.map(_.asInstanceOf[EnqueueEvent]))
-//            complete(eventualEvents)
-//          }
-//        }
-//      },
-
-//
-//  val requestHandler: HttpRequest => HttpResponse = {
-//    case HttpRequest(GET, Uri.Path("/"), _, _, _) =>
-//      val eventualEvents: Future[Events] = (store ? GetEvents()).mapTo[Events]
-//      println(eventualEvents.)
-//      complete(HttpResponse(
-//        entity =
-//          HttpEntity(ContentTypes.`application/json`, """{"test":"pretty"}""")
-//      ))
-//
-//    case HttpRequest(GET, Uri.Path("/ping"), _, _, _) =>
-//      HttpResponse(entity = "PONG!")
-//
-//    case r: HttpRequest =>
-//      r.discardEntityBytes() // important to drain incoming HTTP Entity stream
-//      HttpResponse(404, entity = "Unknown resource!")
-//  }
-
-//  val bindingFuture: Future[Http.ServerBinding] =
-//    serverSource
-//      .to(Sink.foreach { connection =>
-//        println("Accepted new connection from " + connection.remoteAddress)
-//
-//        connection handleWithSyncHandler requestHandler
-//      // this is equivalent to
-//      // connection handleWith { Flow[HttpRequest] map requestHandler }
-//      })
-//      .run()
 
   val serverSource =
     Http().bindAndHandle(routes, interface = "localhost", port = 8080)
