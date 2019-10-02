@@ -14,7 +14,7 @@ object Store {
 class Store extends Actor {
   import Store._
 
-  private var events: Set[QueueEvent] = Set.empty[QueueEvent] + EnqueueEvent(1, 1, "a", "b", "c")
+  private var events: Set[QueueEvent] = Set.empty[QueueEvent]
 
   override def receive: Receive = {
     case StoreEvent(event: QueueEvent) =>

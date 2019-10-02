@@ -9,13 +9,16 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.petlew.gacek.visualisation.Store.{Events, GetEvents}
-import com.petlew.gacek.visualisation.{EnqueueEvent, Store, UdpServer}
+import com.petlew.gacek.visualisation.{EnqueueEvent, GraphBuilder, GraphRepresentation, Node, Store, UdpServer}
 import spray.json._
 
 import scala.concurrent.duration._
 
 trait JsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val eventFormat = jsonFormat5(EnqueueEvent)
+  implicit val nodeFormat = jsonFormat3(Node)
+  implicit val linkFormat = jsonFormat3(com.petlew.gacek.visualisation.Link)
+  implicit val graphFormat = jsonFormat2(GraphRepresentation)
 }
 
 object Main extends Directives with App with JsonSupport {
@@ -29,7 +32,7 @@ object Main extends Directives with App with JsonSupport {
   implicit lazy val timeout = Timeout(5.seconds)
 
   private val service = system.actorOf(
-    UdpServer.props(new InetSocketAddress("localhost", 2321), store)
+    UdpServer.props(new InetSocketAddress("localhost", 2313), store)
   )
 
   private val corsResponseHeaders = List(
@@ -44,7 +47,12 @@ object Main extends Directives with App with JsonSupport {
     get {
       concat(
         pathSingleSlash {
-          val eventualEvents = (store ? GetEvents).mapTo[Events].map(_.events).map(_.map(_.asInstanceOf[EnqueueEvent]))
+          val eventualEvents = (store ? GetEvents)
+            .mapTo[Events]
+            .map(_.events)
+            .map(_.map(_.asInstanceOf[EnqueueEvent]))
+            .map(GraphBuilder.buildGraph)
+
           respondWithHeaders(corsResponseHeaders) {
             complete(eventualEvents)
           }

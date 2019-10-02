@@ -106,13 +106,13 @@
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2));
 
-
-    update(graphData.links, graphData.nodes);
+    //
+    // update(graphData.links, graphData.nodes);
 
     $.ajax({
         url: "http://localhost:8080/",
         success: function (result) {
-            console.log(result)
+            update(result.links, result.nodes);
         }
     });
 
@@ -133,7 +133,7 @@
 
         link.append("title")
             .text(function (d) {
-                return d.type;
+                return d.weight.toString();
             });
 
         edgepaths = svg.selectAll(".edgepath")
@@ -160,7 +160,7 @@
                 'id': function (d, i) {
                     return 'edgelabel' + i
                 },
-                'font-size': 10,
+                'font-size': 12,
                 'fill': '#aaa'
             });
 
@@ -172,7 +172,7 @@
             .style("pointer-events", "none")
             .attr("startOffset", "50%")
             .text(function (d) {
-                return d.type
+                return d.weight
             });
 
         node = svg.selectAll(".node")
@@ -200,7 +200,7 @@
         node.append("text")
             .attr("dy", -3)
             .text(function (d) {
-                return d.name + ":" + d.label;
+                return d.name + ":" + d.mailboxSize;
             });
 
         simulation
