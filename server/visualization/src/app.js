@@ -14,4 +14,4 @@ fs.readFile('./index.html', function (err, html) {
 });
 
 // Console will print the message
-console.log('Server running at http://127.0.0.1:8081/');
+console.log('Server running at http://127.0.0.1:' + config.port);
