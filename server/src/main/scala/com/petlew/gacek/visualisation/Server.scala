@@ -9,7 +9,7 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.petlew.gacek.visualisation.Store.{Events, GetEvents}
-import com.petlew.gacek.visualisation.{EnqueueEvent, GraphBuilder, GraphRepresentation, Node, Store, UdpServer}
+import com.petlew.gacek.visualisation.{EnqueueEvent, GraphBuilder, GraphRepresentation, Node, Store, UdpServer, VisualizationConfig}
 import spray.json._
 
 import scala.concurrent.duration._
@@ -31,9 +31,9 @@ object Main extends Directives with App with JsonSupport {
 
   implicit lazy val timeout = Timeout(5.seconds)
 
-  private val service = system.actorOf(
-    UdpServer.props(new InetSocketAddress("localhost", 2313), store)
-  )
+  val config = VisualizationConfig.fromConfig(system.settings.config)
+
+  private val service = system.actorOf(UdpServer.props(config.address, store))
 
   private val corsResponseHeaders = List(
     `Access-Control-Allow-Origin`.*,
