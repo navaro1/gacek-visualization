@@ -1,6 +1,6 @@
 var http = require("http");
-var fs = require("fs")
-
+var fs = require("fs");
+var config = require('./config.js');
 
 fs.readFile('./index.html', function (err, html) {
     if (err) {
@@ -10,7 +10,7 @@ fs.readFile('./index.html', function (err, html) {
         response.writeHeader(200, {"Content-Type": "text/html"});
         response.write(html);
         response.end();
-    }).listen(8081);
+    }).listen(config.port);
 });
 
 // Console will print the message
