@@ -29,54 +29,6 @@
     // http://bl.ocks.org/fancellu/2c782394602a93921faff74e594d1bb1
     var colors = d3.scaleOrdinal(d3.schemeCategory10);
 
-    var graphData = {
-        "nodes": [
-            {
-                "name": "Peter",
-                "label": "Person",
-                "id": 1
-            }
-            // {
-            //     "name": "Michael",
-            //     "label": "Person",
-            //     "id": 2
-            // },
-            // {
-            //     "name": "Neo4j",
-            //     "label": "Database",
-            //     "id": 3
-            // },
-            // {
-            //     "name": "Graph Database",
-            //     "label": "Database",
-            //     "id": 4
-            // }
-        ],
-        "links": [
-            // {
-            //     "source": 1,
-            //     "target": 2,
-            //     "type": "KNOWS",
-            //     "since": 2010
-            // },
-            // {
-            //     "source": 1,
-            //     "target": 3,
-            //     "type": "FOUNDED"
-            // },
-            // {
-            //     "source": 2,
-            //     "target": 3,
-            //     "type": "WORKS_ON"
-            // },
-            // {
-            //     "source": 3,
-            //     "target": 4,
-            //     "type": "IS_A"
-            // }
-        ]
-    };
-
     var svg = d3.select("svg"),
         width = +svg.attr("width"),
         height = +svg.attr("height"),
@@ -102,28 +54,30 @@
     var simulation = d3.forceSimulation()
         .force("link", d3.forceLink().id(function (d) {
             return d.id;
-        }).distance(100).strength(1))
+        }).distance(200).strength(1))
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2));
 
-    //
-    // update(graphData.links, graphData.nodes);
+    var maxSize, minSize;
+
+    function calculateRadius(d) {
+        return (d.mailboxSize - minSize) / (maxSize - minSize) * (40) + 10;
+    }
 
     $.ajax({
         url: "http://localhost:8080/",
         success: function (result) {
+            var sizes = result.nodes.map(function (value) { return value.mailboxSize; });
+            maxSize = Math.max.apply(null, sizes);
+            minSize = Math.min.apply(null, sizes);
+
             update(result.links, result.nodes);
+
         }
     });
 
-
-    // d3.json({}, function (error, graph) {
-    //     console.log(graph);
-    //     if (error) throw error;
-    //     update(graph.links, graph.nodes);
-    // });
-
     function update(links, nodes) {
+
         link = svg.selectAll(".link")
             .data(links)
             .enter()
@@ -160,7 +114,7 @@
                 'id': function (d, i) {
                     return 'edgelabel' + i
                 },
-                'font-size': 12,
+                'font-size': 20,
                 'fill': '#aaa'
             });
 
@@ -172,7 +126,7 @@
             .style("pointer-events", "none")
             .attr("startOffset", "50%")
             .text(function (d) {
-                return d.weight
+                return d.weight.toString()
             });
 
         node = svg.selectAll(".node")
@@ -187,7 +141,9 @@
             );
 
         node.append("circle")
-            .attr("r", 5)
+            .attr("r", function(d, i) {
+                return calculateRadius(d);
+            })
             .style("fill", function (d, i) {
                 return colors(i);
             });
@@ -200,7 +156,7 @@
         node.append("text")
             .attr("dy", -3)
             .text(function (d) {
-                return d.name + ":" + d.mailboxSize;
+                return d.name;
             });
 
         simulation
@@ -220,10 +176,30 @@
                 return d.source.y;
             })
             .attr("x2", function (d) {
-                return d.target.x;
+                // Total difference in x and y from source to target
+                var diffX = d.target.x - d.source.x;
+                var diffY = d.target.y - d.source.y;
+
+                // Length of path from center of source node to center of target node
+                var pathLength = Math.sqrt((diffX * diffX) + (diffY * diffY));
+
+                // x and y distances from center to outside edge of target node
+                var offsetX = (diffX * calculateRadius(d.target)) / pathLength;
+                var offsetY = (diffY * calculateRadius(d.target)) / pathLength;
+                return d.target.x - offsetX;
             })
             .attr("y2", function (d) {
-                return d.target.y;
+                // Total difference in x and y from source to target
+                var diffX = d.target.x - d.source.x;
+                var diffY = d.target.y - d.source.y;
+
+                // Length of path from center of source node to center of target node
+                var pathLength = Math.sqrt((diffX * diffX) + (diffY * diffY));
+
+                // x and y distances from center to outside edge of target node
+                var offsetX = (diffX * calculateRadius(d.target)) / pathLength;
+                var offsetY = (diffY * calculateRadius(d.target)) / pathLength;
+                return d.target.y - offsetY;
             });
 
         node
@@ -232,7 +208,8 @@
             });
 
         edgepaths.attr('d', function (d) {
-            return 'M ' + d.source.x + ' ' + d.source.y + ' L ' + d.target.x + ' ' + d.target.y;
+
+            return "M" + d.source.x + "," + d.source.y + "L" + d.target.x+ "," + d.target.y;
         });
 
         edgelabels.attr('transform', function (d) {
@@ -258,12 +235,6 @@
         d.fx = d3.event.x;
         d.fy = d3.event.y;
     }
-
-    //    function dragended(d) {
-    //        if (!d3.event.active) simulation.alphaTarget(0);
-    //        d.fx = undefined;
-    //        d.fy = undefined;
-    //    }
 
 </script>
 
